@@ -22,7 +22,7 @@ jobs:
           'onos-lib-go',
           'onos-operator',
           'onos-topo',
-          'onos-uenib'
+          'onos-uenib' 
         ] # Add all your directories here
     steps:
     - name: Check out the code
