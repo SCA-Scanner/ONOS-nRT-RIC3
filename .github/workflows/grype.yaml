@@ -5,7 +5,7 @@ on:
   push:
     branches: [ "main" ]
 
-jobs:
+jobs: 
   Grype-Scan:
     permissions:
       contents: read # for actions/checkout to fetch code
