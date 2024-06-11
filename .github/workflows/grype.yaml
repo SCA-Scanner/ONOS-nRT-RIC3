@@ -17,7 +17,7 @@ jobs:
         directory: ['onos-a1t',
           'onos-cli',
           'onos-config',
-          'onos-e2t',
+          'onos-e2t', 
           'onos-kpimon',
           'onos-lib-go',
           'onos-operator',
