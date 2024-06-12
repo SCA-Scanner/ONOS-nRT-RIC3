@@ -175,7 +175,7 @@ def dump_scan_results(rics, sca_tools):
                 with open(sca_tool_file_path) as file:
                     vuln = file.read()
                 scan_results[ric][repository][sca_tool_file] = vuln
-    with open("." + 'sca_results.json', 'w') as file:
+    with open('sca_results.json', 'w') as file:
         json.dump(scan_results, file)
     print("Finished writing: " + 'sca_results.json')
     pprint.pprint(sca_results.json)
