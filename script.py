@@ -148,12 +148,15 @@ def save_vulnerabilities_by_directory(vulnerabilities_by_directory, base_dir="./
         with open(filepath, 'w') as json_file:
             json.dump(vulnerabilities, json_file, indent=4)
 
-def dump_scan_results():
+def dump_scan_results(rics, sca_tools):
     scan_results = dict.fromkeys(rics)
     onos_repos = []
     osc_repos = []
     for ric in rics:
-        for repository in sorted(os.listdir("." + ric)):
+        ric_dir = "./" + ric
+        if not os.path.exists(ric_dir):
+            os.makedirs(ric_dir)
+        for repository in sorted(os.listdir(ric_dir)):
             if ric == "ONOS":
                 onos_repos.append(repository)
             elif ric == "OSC":
@@ -163,10 +166,10 @@ def dump_scan_results():
             scan_results[ric] = dict.fromkeys(onos_repos)
         elif ric == "OSC":
             scan_results[ric] = dict.fromkeys(osc_repos)
-        for repository in sorted(os.listdir("." + ric)):
+        for repository in sorted(os.listdir("./" + ric)):
             scan_results[ric][repository] = dict.fromkeys(sca_tools)
             print("In repository:" + repository)
-            path_to_repository = os.path.join("." + ric, repository)
+            path_to_repository = os.path.join("./" + ric, repository)
             for sca_tool_file in sorted(os.listdir(path_to_repository)):
                 sca_tool_file_path = os.path.join(path_to_repository, sca_tool_file)
                 with open(sca_tool_file_path) as file:
@@ -193,7 +196,7 @@ def main():
         vulnerabilities_by_directory[directory].append(vuln)
 
     save_vulnerabilities_by_directory(vulnerabilities_by_directory)
-    dump_scan_results()
+    dump_scan_results(['ONOS', 'OSC'], ['Grype.txt', 'Snyk.txt', 'Trivy.txt'])
 
 if __name__ == "__main__":
     main()
