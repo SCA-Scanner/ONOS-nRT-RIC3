@@ -197,7 +197,7 @@ def main():
         vulnerabilities_by_directory[directory].append(vuln)
 
     save_vulnerabilities_by_directory(vulnerabilities_by_directory)
-    dump_scan_results(['ONOS', 'OSC'], ['Grype.txt', 'Snyk.txt', 'Trivy.txt'])
+    dump_scan_results(['ONOS', 'OSC'], ['Grype.txt'])
 
 if __name__ == "__main__":
     main()
