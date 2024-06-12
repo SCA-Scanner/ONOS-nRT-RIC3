@@ -178,7 +178,7 @@ def dump_scan_results(rics, sca_tools):
     with open('sca_results.json', 'w') as file:
         json.dump(scan_results, file)
     print("Finished writing: " + 'sca_results.json')
-    pprint.pprint(sca_results.json)
+    pprint.pprint(scan_results)
 
 def main():
     parser = argparse.ArgumentParser(description='Format SCA tool data')
