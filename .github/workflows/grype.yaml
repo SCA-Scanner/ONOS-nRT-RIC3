@@ -3,76 +3,103 @@ name: Grype scan
 on:
   workflow_call:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 jobs:
-    Grype-Scan:
-      permissions:
-        contents: read # for actions/checkout to fetch code
-        security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-        actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-      runs-on: ubuntu-latest
-      steps:
-      - name: Check out the code
-        uses: actions/checkout@v3
+  add-subtrees:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Git
+      run: |
+        git config --global user.name "${{ secrets.GIT_USERNAME }}"
+        git config --global user.email "${{ secrets.GIT_EMAIL }}"
+
+    - name: Make the script executable
+      run: chmod +x add_subtrees.sh
+
+    - name: Run add_subtrees.sh
+      run: ./add_subtrees.sh onos  # Change 'osc' to 'onos' or 'aic' as needed
+
+    - name: Commit changes
+      run: |
+        git add .
+        git commit -m "Rеpositories are in the newest version"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  Grype-Scan:
+    needs: add-subtrees
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out the code
+      uses: actions/checkout@v3
+      
+    - name: Running a scan with a json file as an output
+      uses: anchore/scan-action@v3
+      id: scan1
+      with:
+        fail-build: false
+        add-cpes-if-none: true
+        output-format:  json
         
-      - name: Running a scan with a json file as an output
-        uses: anchore/scan-action@v3
-        id: scan1
-        with:
-          fail-build: false
-          add-cpes-if-none: true
-          output-format:  json
-          
-      - name: Running a scan with a sarif file as an output
-        uses: anchore/scan-action@v3
-        id: scan2
-        with:
-          fail-build: false
-          add-cpes-if-none: true
-          output-format:  sarif
-          
-      - name: Save the json vulnerability report to an artifact
-        uses: actions/upload-artifact@master
-        if: always()
+    - name: Running a scan with a sarif file as an output
+      uses: anchore/scan-action@v3
+      id: scan2
+      with:
+        fail-build: false
+        add-cpes-if-none: true
+        output-format:  sarif
+        
+    - name: Save the json vulnerability report to an artifact
+      uses: actions/upload-artifact@master
+      if: always()
+      with:
+        name: grype_results
+        path: ${{ steps.scan1.outputs.json }}  
+    
+    - name: Upload vulnerability report to github security scanning
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ steps.scan2.outputs.sarif }}  
+    
+  Data_Analysis:
+    name: Data Analysis
+    needs: Grype-Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code 
+        uses: actions/checkout@v3
+      - name: Download result for job Grype-Scan
+        uses: actions/download-artifact@v4
         with:
           name: grype_results
-          path: ${{ steps.scan1.outputs.json }}  
+          path: t-kolev/ric-plt-xapp-frame/scan/
       
-      - name: Upload vulnerability report to github security scanning
-        uses: github/codeql-action/upload-sarif@v3
+      - name: setup python
+        uses: actions/setup-python@v4
         with:
-          sarif_file: ${{ steps.scan2.outputs.sarif }}  
+          python-version: '3.10' # install the python version needed
+
+      - name: install python packages
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+  
+      - name: Running the Python Script
+        run: python script.py t-kolev/ric-plt-xapp-frame/scan/results.json "Grype.txt" > results.json 
       
-    Data_Analysis:
-      name: Data Analysis
-      needs: Grype-Scan
-      runs-on: ubuntu-latest 
-      steps:
-        - name: Check out the code 
-          uses: actions/checkout@v3
-        - name: Download result for job Grype-Scan
-          uses: actions/download-artifact@v4
-          with:
-            name: grype_results
-            path: t-kolev/ric-plt-xapp-frame/scan/
-        
-        - name: setup python
-          uses: actions/setup-python@v4
-          with:
-            python-version: '3.10' # install the python version needed
 
-        - name: install python packages
-          run: |
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
-    
-        - name: Running the Python Script
-          run: python script.py t-kolev/ric-plt-xapp-frame/scan/results.json "Grype.txt" > results.json 
-        
-
-        - name: Save the json vulnerability report to an artifact
-          uses: actions/upload-artifact@master
-          with:
-            name: results_data_analysis
-            path: results.json 
+      - name: Save the json vulnerability report to an artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: results_data_analysis
+          path: results.json

@@ -18,7 +18,6 @@ rics = ['ONOS', 'OSC']
 
 repoWithError = []
 
-
 # Packages to exclude in the RIC repos
 test_package = re.compile(r'test/')
 benchmark_package = re.compile(r'benchmark')
@@ -43,16 +42,12 @@ def formatGrype(repository):
     for vuln in GrypeRepo["matches"]:
         path = vuln.get("artifact").get("locations")[0].get("path")
         if test_package.search(path) is not None:
-            print("Grype: Skipping")
             continue
         elif benchmark_package.search(path) is not None:
-            print("Grype: Skipping")
             continue
         elif examples_package.search(path) is not None:
-            print("Grype: Skipping")
             continue
         elif testapplication_package.search(path) is not None:
-            print("Grype: Skipping")
             continue
         else:
             vulnArray.append(vuln)
@@ -142,7 +137,7 @@ def save_vulnerabilities_by_directory(vulnerabilities_by_directory, base_dir="./
         dir_path = os.path.join(base_dir, clean_directory)
         os.makedirs(dir_path, exist_ok=True)
         
-        filename = "vulnerabilities.json"
+        filename = "Grype.txt"
         filepath = os.path.join(dir_path, filename)
         
         with open(filepath, 'w') as json_file:
