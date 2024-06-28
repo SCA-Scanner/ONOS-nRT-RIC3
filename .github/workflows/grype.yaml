@@ -26,11 +26,15 @@ jobs:
     - name: Run update_repo.sh
       run: ./update_repo.sh onos  # Change 'osc' to 'onos' or 'aic' as needed
 
-    - name: Commit changes
+    - name: Check for changes
       run: |
         git add .
-        git commit -m "Rеpositories are in the newest version"
-        git push
+        if git diff-index --quiet HEAD; then
+          echo "No changes to commit."
+        else
+          git commit -m "Update subtrees"
+          git push 
+        fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
