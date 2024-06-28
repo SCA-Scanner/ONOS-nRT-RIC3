@@ -22,7 +22,7 @@ jobs:
       run: chmod +x update_repo.sh
 
     - name: Run update_repo.sh
-      run: ./update_repo onos  # Change 'osc' to 'onos' or 'aic' as needed
+      run: ./update_repo.sh onos  # Change 'osc' to 'onos' or 'aic' as needed
 
     - name: Commit changes
       run: |
