@@ -1,27 +1,7 @@
 #!/bin/bash
 
-# Check if an argument is provided
-if [ -z "$1" ]; then
-    echo "Error: No argument provided. Please provide one of the following: onos, osc, aic"
-    exit 1
-fi
-
-# Determine the URLs file based on the argument
-case $1 in
-    onos)
-        URLS_FILE="onos_links.txt"
-        ;;
-    osc)
-        URLS_FILE="osc_links.txt"
-        ;;
-    aic)
-        URLS_FILE="aic_links.txt"
-        ;;
-    *)
-        echo "Error: Invalid argument. Please provide one of the following: onos, osc, aic"
-        exit 1
-        ;;
-esac
+# Path to the text file containing remote repo URLs
+URLS_FILE="onos_links.txt"
 
 # Remote branch
 REMOTE_BRANCH="master"
@@ -31,6 +11,10 @@ if [ ! -f "$URLS_FILE" ]; then
     echo "Error: URLs file not found: $URLS_FILE"
     exit 1
 fi
+
+# Output current directory and git status for debugging
+echo "Current directory: $(pwd)"
+git status
 
 # Loop through each URL in the file and run git subtree command
 while IFS= read -r url; do
@@ -58,3 +42,6 @@ while IFS= read -r url; do
         fi
     fi
 done < "$URLS_FILE"
+
+# Output final git status for debugging
+git status
