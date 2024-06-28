@@ -34,14 +34,27 @@ fi
 
 # Loop through each URL in the file and run git subtree command
 while IFS= read -r url; do
-    # Extract the last word of the URL
+    # Extract the last part of the URL to use as the local directory name
     local_dir=$(basename "$url" .git)
 
-    echo "Adding subtree for URL: $url"
-    git subtree add --prefix "$local_dir" "$url" "$REMOTE_BRANCH" --squash
-    if [ $? -ne 0 ]; then
-        echo "Error: Failed to add subtree for URL: $url"
+    echo "Processing subtree for URL: $url"
+
+    # Check if the directory already exists
+    if [ -d "$local_dir" ]; then
+        echo "Directory $local_dir already exists. Updating subtree..."
+        git subtree pull --prefix "$local_dir" "$url" "$REMOTE_BRANCH" --squash
+        if [ $? -ne 0 ]; then
+            echo "Error: Failed to update subtree for URL: $url"
+        else
+            echo "Subtree updated successfully for URL: $url"
+        fi
     else
-        echo "Subtree added successfully for URL: $url"
+        echo "Adding new subtree..."
+        git subtree add --prefix "$local_dir" "$url" "$REMOTE_BRANCH" --squash
+        if [ $? -ne 0 ]; then
+            echo "Error: Failed to add subtree for URL: $url"
+        else
+            echo "Subtree added successfully for URL: $url"
+        fi
     fi
 done < "$URLS_FILE"
