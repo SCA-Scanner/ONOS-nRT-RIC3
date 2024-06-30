@@ -5,40 +5,40 @@ on:
   push:
     branches: [ "main" ]
 
-# jobs:
-#   update-repo:
-#     runs-on: ubuntu-latest
+jobs:
+  update-repo:
+    runs-on: ubuntu-latest
 
-#     steps:
-#     - name: Checkout source
-#       uses: actions/checkout@v3
-#       with:
-#         fetch-depth: 0
+    steps:
+    - name: Checkout source
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
-#     - name: Set up Git
-#       run: |
-#         git config --global user.name "${{ secrets.GIT_USERNAME }}"
-#         git config --global user.email "${{ secrets.GIT_EMAIL }}"
+    - name: Set up Git
+      run: |
+        git config --global user.name "${{ secrets.GIT_USERNAME }}"
+        git config --global user.email "${{ secrets.GIT_EMAIL }}"
 
-#     - name: Make the script executable
-#       run: chmod +x update_repo.sh
+    - name: Make the script executable
+      run: chmod +x update_repo.sh
 
-#     - name: Run update_repo.sh
-#       run: ./update_repo.sh onos  # Change 'osc' to 'onos' or 'aic' as needed
+    - name: Run update_repo.sh
+      run: ./update_repo.sh onos  # Change 'osc' to 'onos' or 'aic' as needed
 
-#     - name: Check for changes
-#       run: |
-#         git add .
-#         if git diff-index --quiet HEAD; then
-#           echo "No changes to commit."
-#         else
-#           git commit -m "Update subtrees"
-#           git push 
-#         fi
-#       env:
-#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Check for changes
+      run: |
+        git add .
+        if git diff-index --quiet HEAD; then
+          echo "No changes to commit."
+        else
+          git commit -m "Update subtrees"
+          git push 
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-Grype-Scan:
+  Grype-Scan:
     needs: update-repo
     permissions:
       contents: read # for actions/checkout to fetch code
