@@ -148,7 +148,7 @@ def dump_scan_results(rics, sca_tools):
     onos_repos = []
     osc_repos = []
     for ric in rics:
-        ric_dir = "./" + ric
+        ric_dir = ric
         if not os.path.exists(ric_dir):
             os.makedirs(ric_dir)
         for repository in sorted(os.listdir(ric_dir)):
