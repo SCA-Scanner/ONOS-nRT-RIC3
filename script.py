@@ -163,13 +163,13 @@ def dump_scan_results(rics, sca_tools):
             scan_results[ric] = dict.fromkeys(osc_repos)
         for repository in sorted(os.listdir("./" + ric)):
             scan_results[ric][repository] = dict.fromkeys(sca_tools)
-            print("In repository:" + repository)
             path_to_repository = os.path.join("./" + ric, repository)
             for sca_tool_file in sorted(os.listdir(path_to_repository)):
                 sca_tool_file_path = os.path.join(path_to_repository, sca_tool_file)
                 with open(sca_tool_file_path) as file:
-                    vuln = file.read()
-                scan_results[ric][repository][sca_tool_file] = vuln
+                    unformatted_data = file.read()
+                formatted_data = format_sca_tool_data(unformatted_data, sca_tool_file)
+                scan_results[ric][repository][sca_tool_file] = formatted_data
     with open('sca_results.json', 'w') as file:
         json.dump(scan_results, file)
     print("Finished writing: " + 'sca_results.json')
@@ -185,6 +185,7 @@ def main():
         data = file.read()
 
     vulnerabilities_by_directory = defaultdict(list)
+
     formatted_data = format_sca_tool_data(data, args.tool)
     for vuln in formatted_data:
         path = vuln.get("artifact").get("locations")[0].get("path")
