@@ -133,7 +133,7 @@ def formatTrivy(repository):
 
 def save_vulnerabilities_by_directory(vulnerabilities_by_directory, base_dir="./ONOS"):
     for directory, vulnerabilities in vulnerabilities_by_directory.items():
-        clean_directory = re.sub(r'[^a-zA-Z0-9_\-]', '_', directory)
+        clean_directory = re.sub(r'[^a-zA-Z0-9_\-]', '', directory)
         dir_path = os.path.join(base_dir, clean_directory)
         os.makedirs(dir_path, exist_ok=True)
         
@@ -148,7 +148,7 @@ def dump_scan_results(rics, sca_tools):
     onos_repos = []
     osc_repos = []
     for ric in rics:
-        ric_dir = ric
+        ric_dir = "./" + ric
         if not os.path.exists(ric_dir):
             os.makedirs(ric_dir)
         for repository in sorted(os.listdir(ric_dir)):
