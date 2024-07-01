@@ -310,16 +310,12 @@ def count_cves(cve_data):
         print("RIC: {}, Total unique CVEs: {}".format(ric, len(ric_cves[ric])))
 
 
-def per_repo_cve_count():
-    print("1. cves per ric/repo/tool\n"
-          "2. total cves per ric/repo with duplicates\n"
-          "3. total cves per ric/repo without duplicates")
-    cve_json_file = os.path.join(path_to_results + 'sca_cvecvss_dependencies_results.json')
-    cve_data = {}
-    with open(cve_json_file) as file:
-        cve_data = json.load(file)
-    # pprint.pprint(cve_data)
-    # First cves per ric/repo/tool
+def per_repo_cve_count(cve_data):
+    print("1. CVEs per RIC/repo/tool\n"
+          "2. Total CVEs per RIC/repo with duplicates\n"
+          "3. Total CVEs per RIC/repo without duplicates")
+    
+    # First CVEs per RIC/repo/tool
     cve_per_ric_repo_tool = dict.fromkeys(rics)
     for ric in cve_data.keys():
         cve_per_ric_repo_tool[ric] = dict.fromkeys(cve_data[ric].keys())
@@ -332,7 +328,7 @@ def per_repo_cve_count():
                     cve_per_ric_repo_tool[ric][repository][sca_tool] = len(cve_data[ric][repository][sca_tool][0])
     pprint.pprint(cve_per_ric_repo_tool)
 
-    # Now combine the cves from all the tools and save two lists with_dups and without_dups
+    # Now combine the CVEs from all the tools and save two lists with_dups and without_dups
     cve_per_ric_repo = dict.fromkeys(rics)
     for ric in cve_data.keys():
         cve_per_ric_repo[ric] = dict.fromkeys(cve_data[ric].keys())
@@ -348,15 +344,11 @@ def per_repo_cve_count():
                         if cve not in cve_list_without_dups:
                             cve_list_without_dups.append(cve)
             cve_per_ric_repo[ric][repository] = [cve_list_with_dups, cve_list_without_dups]
-            print("repository:" + repository)
-            print("length with dups:", len(cve_list_with_dups))
-            print("length without dups:", len(cve_list_without_dups))
-    with open(path_to_results + 'per_ric_per_repo_per_tool_cve_count.json', 'w') as file:
-        json.dump(cve_per_ric_repo_tool, file)
-    with open(path_to_results + 'per_ric_per_repo_cve_count.json', 'w') as file:
-        json.dump(cve_per_ric_repo, file)
+            print("Repository: {}".format(repository))
+            print("Length with duplicates: {}".format(len(cve_list_with_dups)))
+            print("Length without duplicates: {}".format(len(cve_list_without_dups)))
 
-
+    return cve_per_ric_repo_tool, cve_per_ric_repo
 def main():
     parser = argparse.ArgumentParser(description='Format SCA tool data')
     parser.add_argument('data_file', type=str, help='Path to the data file in JSON format')
