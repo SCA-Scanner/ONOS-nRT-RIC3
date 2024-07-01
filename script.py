@@ -351,15 +351,12 @@ def per_repo_cve_count(cve_data):
     return cve_per_ric_repo_tool, cve_per_ric_repo
 
 
-def cvss_distribution():
-    print("1. Print per ric per repo per tool cvss >= 8\n"
-          "2. Print per ric per repo cvss >=8 ")
-    cve_json_file = os.path.join(path_to_results + 'sca_cvecvss_dependencies_results.json')
-    cvss_data = {}
-    with open(cve_json_file) as file:
-        cvss_data = json.load(file)
-    # pprint.pprint(cve_data)
-    print("Going to compare cve list and cvss list and then count the number of cvss")
+def cvss_distribution(cvss_data):
+    print("1. Print per RIC per repo per tool CVSS >= 8\n"
+          "2. Print per RIC per repo CVSS >= 8")
+    
+    # Print total CVE and CVSS counts per RIC
+    print("Going to compare CVE list and CVSS list and then count the number of CVSS")
     for ric in cvss_data.keys():
         total_cve_count = 0
         total_cvss_count = 0
@@ -369,125 +366,67 @@ def cvss_distribution():
                 total_cvss_count += len(cvss_data[ric][repository][sca_tool][1])
         print("RIC:{}, total_cve_count:{}, total_cvss_count:{}".format(ric, total_cve_count, total_cvss_count))
 
-    # First cves per ric/repo/tool
-    '''
-    low_cvss_per_ric_repo_tool = dict.fromkeys(rics)
-    medium_cvss_per_ric_repo_tool = dict.fromkeys(rics)
-    high_cvss_per_ric_repo_tool = dict.fromkeys(rics)
-    critical_cvss_per_ric_repo_tool = dict.fromkeys(rics)
-    none_counter = 0
-    for ric in cvss_data.keys():
-        low_cvss_per_ric_repo_tool[ric] = dict.fromkeys(cvss_data[ric].keys())
-        medium_cvss_per_ric_repo_tool[ric] = dict.fromkeys(cvss_data[ric].keys())
-        high_cvss_per_ric_repo_tool[ric] = dict.fromkeys(cvss_data[ric].keys())
-        critical_cvss_per_ric_repo_tool[ric] = dict.fromkeys(cvss_data[ric].keys())
-        for repository in cvss_data[ric].keys():
-            low_cvss_per_ric_repo_tool[ric][repository] = dict.fromkeys(cvss_data[ric][repository].keys())
-            medium_cvss_per_ric_repo_tool[ric][repository] = dict.fromkeys(cvss_data[ric][repository].keys())
-            high_cvss_per_ric_repo_tool[ric][repository] = dict.fromkeys(cvss_data[ric][repository].keys())
-            critical_cvss_per_ric_repo_tool[ric][repository] = dict.fromkeys(cvss_data[ric][repository].keys())
-            for sca_tool in cvss_data[ric][repository].keys():
-                low_cves = []
-                medium_cves = []
-                high_cves = []
-                critical_cves = []
-                if sca_tool == "Scantist.json":
-                    continue
-                else:
-                    for index, cvss in enumerate(cvss_data[ric][repository][sca_tool][1]):
-                        if cvss is None:
-                            none_counter += 1
-                            print("Found none:")
-                            print(cvss_data[ric][repository][sca_tool])
-                        if cvss is not None and 0.1 <= cvss <= 3.9:
-                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}, Package: {}".format(repository, sca_tool, cvss_data[ric][repository][sca_tool][0][index], cvss,cvss_data[ric][repository][sca_tool][2][index]))
-                            if cvss_data[ric][repository][sca_tool][0][index] not in low_cves:
-                                low_cves.append(cvss_data[ric][repository][sca_tool][0][index])
-                        elif cvss is not None and 4.0 <= cvss <= 6.9:
-                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}, Package: {}".format(repository, sca_tool, cvss_data[ric][repository][sca_tool][0][index], cvss,cvss_data[ric][repository][sca_tool][2][index]))
-                            if cvss_data[ric][repository][sca_tool][0][index] not in medium_cves:
-                                medium_cves.append(cvss_data[ric][repository][sca_tool][0][index])
-                        elif cvss is not None and 7.0 <= cvss <= 8.9:
-                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}, Package: {}".format(repository, sca_tool, cvss_data[ric][repository][sca_tool][0][index], cvss,cvss_data[ric][repository][sca_tool][2][index]))
-                            if cvss_data[ric][repository][sca_tool][0][index] not in high_cves:
-                                high_cves.append(cvss_data[ric][repository][sca_tool][0][index])
-                        elif cvss is not None and 9.0 <= cvss <= 10.0:
-                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}, Package: {}".format(repository, sca_tool, cvss_data[ric][repository][sca_tool][0][index], cvss,cvss_data[ric][repository][sca_tool][2][index]))
-                            if cvss_data[ric][repository][sca_tool][0][index] not in critical_cves:
-                                critical_cves.append(cvss_data[ric][repository][sca_tool][0][index])
-                low_cvss_per_ric_repo_tool[ric][repository][sca_tool] = [len(low_cves), low_cves]
-                medium_cvss_per_ric_repo_tool[ric][repository][sca_tool] = [len(medium_cves), medium_cves]
-                high_cvss_per_ric_repo_tool[ric][repository][sca_tool] = [len(high_cves), high_cves]
-                critical_cvss_per_ric_repo_tool[ric][repository][sca_tool] = [len(critical_cves), critical_cves]
-    with open(path_to_results + 'per_ric_per_repo_per_tool_low_cves.json', 'w') as file:
-        json.dump(low_cvss_per_ric_repo_tool, file)
-    with open(path_to_results + 'per_ric_per_repo_per_tool_medium_cves.json', 'w') as file:
-        json.dump(medium_cvss_per_ric_repo_tool, file)
-    with open(path_to_results + 'per_ric_per_repo_per_tool_high_cves.json', 'w') as file:
-        json.dump(high_cvss_per_ric_repo_tool, file)
-    with open(path_to_results + 'per_ric_per_repo_per_tool_critical_cves.json', 'w') as file:
-        json.dump(critical_cvss_per_ric_repo_tool, file)
-    print("Nonecounter: " + str(none_counter))
-    # pprint.pprint(cvss_per_ric_repo_tool)
-    # exit()
-    # Low: 0.1-3.9. Medium: 4.0-6.9. High: 7.0-8.9. Critical: 9.0-10.0.
-    '''
+    # Initialize dictionaries for CVSS distribution
     low_cvss_per_ric_repo = dict.fromkeys(rics)
     medium_cvss_per_ric_repo = dict.fromkeys(rics)
     high_cvss_per_ric_repo = dict.fromkeys(rics)
     critical_cvss_per_ric_repo = dict.fromkeys(rics)
     cve_per_ric_repo = dict.fromkeys(rics)
     none_counter = 0
+    
     for ric in cvss_data.keys():
         low_cvss_per_ric_repo[ric] = dict.fromkeys(cvss_data[ric].keys())
         medium_cvss_per_ric_repo[ric] = dict.fromkeys(cvss_data[ric].keys())
         high_cvss_per_ric_repo[ric] = dict.fromkeys(cvss_data[ric].keys())
         critical_cvss_per_ric_repo[ric] = dict.fromkeys(cvss_data[ric].keys())
         cve_per_ric_repo[ric] = dict.fromkeys(cvss_data[ric].keys())
+        
         for repository in cvss_data[ric].keys():
             low_cvss_per_ric_repo[ric][repository] = dict.fromkeys(cvss_data[ric][repository].keys())
             medium_cvss_per_ric_repo[ric][repository] = dict.fromkeys(cvss_data[ric][repository].keys())
             high_cvss_per_ric_repo[ric][repository] = dict.fromkeys(cvss_data[ric][repository].keys())
             critical_cvss_per_ric_repo[ric][repository] = dict.fromkeys(cvss_data[ric][repository].keys())
             cve_per_ric_repo[ric][repository] = dict.fromkeys(cvss_data[ric][repository].keys())
+            
             low_cves = []
             medium_cves = []
             high_cves = []
             critical_cves = []
             cves = []
+            
             for sca_tool in cvss_data[ric][repository].keys():
                 if sca_tool == "Scantist.json":
                     continue
                 else:
                     for index, cvss in enumerate(cvss_data[ric][repository][sca_tool][1]):
-                        # print("index:{}".format(index))
                         cve = cvss_data[ric][repository][sca_tool][0][index]
                         if cvss is None:
                             none_counter += 1
                         elif 0.1 <= cvss <= 3.9:
-                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))#,cvss_data[ric][repository][sca_tool][2][index]))
+                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))
                             if cve not in low_cves and cve not in medium_cves and cve not in high_cves and cve not in critical_cves:
                                 low_cves.append(cve)
                             if cve not in cves:
                                 cves.append(cve)
                         elif 4.0 <= cvss <= 6.9:
-                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))#,cvss_data[ric][repository][sca_tool][2][index]))
+                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))
                             if cve not in low_cves and cve not in medium_cves and cve not in high_cves and cve not in critical_cves:
                                 medium_cves.append(cve)
                             if cve not in cves:
                                 cves.append(cve)
                         elif 7.0 <= cvss <= 8.9:
-                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))#,cvss_data[ric][repository][sca_tool][2][index]))
+                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))
                             if cve not in low_cves and cve not in medium_cves and cve not in high_cves and cve not in critical_cves:
                                 high_cves.append(cve)
                             if cve not in cves:
                                 cves.append(cve)
                         elif 9.0 <= cvss <= 10.0:
-                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))#,cvss_data[ric][repository][sca_tool][2][index]))
+                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))
                             if cve not in low_cves and cve not in medium_cves and cve not in high_cves and cve not in critical_cves:
                                 critical_cves.append(cve)
                             if cve not in cves:
                                 cves.append(cve)
+            
             low_cvss_per_ric_repo[ric][repository] = [len(low_cves), low_cves]
             medium_cvss_per_ric_repo[ric][repository] = [len(medium_cves), medium_cves]
             high_cvss_per_ric_repo[ric][repository] = [len(high_cves), high_cves]
@@ -495,17 +434,10 @@ def cvss_distribution():
             cve_per_ric_repo[ric][repository] = [len(cves), cves]
             total = len(low_cves) + len(medium_cves) + len(high_cves) + len(critical_cves)
             print("RIC: {}, Repository: {}, Total count: {}".format(ric, repository, total))
-    with open(path_to_results + 'per_ric_per_repo_low_cves.json', 'w') as file:
-        json.dump(low_cvss_per_ric_repo, file)
-    with open(path_to_results + 'per_ric_per_repo_medium_cves.json', 'w') as file:
-        json.dump(medium_cvss_per_ric_repo, file)
-    with open(path_to_results + 'per_ric_per_repo_high_cves.json', 'w') as file:
-        json.dump(high_cvss_per_ric_repo, file)
-    with open(path_to_results + 'per_ric_per_repo_critical_cves.json', 'w') as file:
-        json.dump(critical_cvss_per_ric_repo, file)
-    with open(path_to_results + 'per_ric_per_repo_cve_count.json', 'w') as file:
-        json.dump(cve_per_ric_repo, file)
+    
     print("Nonecounter: " + str(none_counter))
+    
+    return low_cvss_per_ric_repo, medium_cvss_per_ric_repo, high_cvss_per_ric_repo, critical_cvss_per_ric_repo, cve_per_ric_repo
 
 def main():
     parser = argparse.ArgumentParser(description='Format SCA tool data')
