@@ -188,20 +188,24 @@ def dump_scan_results(rics, sca_tools):
     pprint.pprint(scan_results)
     return scan_results
 
+# Define the get_cves_cvss_dependencies function
 def get_cves_cvss_dependencies(sca_tool, sca_tool_data):
     cves_cvss_dependencies = []
     cves = []
     cvss = []
     packages = []
     if sca_tool == "Grype.txt":
-        # print("Grype")
         for vulnerability in sca_tool_data:
             if vulnerability.get("vulnerability").get("id") not in cves:
                 cves.append(vulnerability.get("vulnerability").get("id"))
-                cvss.append(vulnerability.get("vulnerability").get("cvss")[0].get("metrics").get("baseScore")) 
+                cvss_info = vulnerability.get("vulnerability").get("cvss")
+                if cvss_info and len(cvss_info) > 0:
+                    cvss.append(cvss_info[0].get("metrics").get("baseScore"))
+                else:
+                    cvss.append(None)  # or handle as you prefer
+                    print(f"Vulnerability without CVSS: {vulnerability.get('vulnerability').get('id')}")
                 vulnerability_match_details = vulnerability.get("matchDetails")
                 for match_detail in vulnerability_match_details:
-                    # print("Printing vulnerability details for:" + str(match_detail))
                     if "package" in match_detail["searchedBy"].keys():
                         packages.append(match_detail["searchedBy"]["package"]["name"])
                     elif "Package" in match_detail["searchedBy"].keys():
@@ -211,23 +215,17 @@ def get_cves_cvss_dependencies(sca_tool, sca_tool_data):
         cves_cvss_dependencies = [cves, cvss, packages]
         return cves_cvss_dependencies
     elif sca_tool == "Snyk.txt":
-        print("Snyk")
         for vulnerability in sca_tool_data:
             if len(vulnerability.get("identifiers").get("CVE")) == 0:
                 continue
-                # cves.append(None)
-                # cvss.append(None)
-                # packages.append(None)
             else:
                 if vulnerability.get("identifiers").get("CVE")[0] not in cves:
                     cves.append(vulnerability.get("identifiers").get("CVE")[0])
                     cvss.append(vulnerability.get("cvssScore"))
                     packages.append(vulnerability.get("moduleName"))
-        print("number of unique vulnerabilities: " + str(len(cves)))
         cves_cvss_dependencies = [cves, cvss, packages]
         return cves_cvss_dependencies
     elif sca_tool == "Trivy.txt":
-        # print("Trivy")
         for vulnerability in sca_tool_data:
             if vulnerability.get("VulnerabilityID") not in cves:
                 if vulnerability.get("CVSS") is not None:
@@ -242,8 +240,7 @@ def get_cves_cvss_dependencies(sca_tool, sca_tool_data):
                         cvss.append(ghsa.get("V3Score"))
                         continue
                 else:
-                    print("Printing a vuln with None score")
-                    pprint.pprint(vulnerability)
+                    print(f"Vulnerability without CVSS: {vulnerability.get('VulnerabilityID')}")
                     continue
         cves_cvss_dependencies = [cves, cvss, packages]
         return cves_cvss_dependencies
