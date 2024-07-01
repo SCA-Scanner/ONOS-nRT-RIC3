@@ -280,14 +280,12 @@ def extract_cves(sca_results):
     # Return the results dictionary
     return sca_cvecvss_dependencies
 
-def count_cves():
-    print("Going to count cves per repo and per ric")
-    cve_json_file = os.path.join(path_to_results + 'sca_cvecvss_dependencies_results.json')
-    cve_data = {}
-    with open(cve_json_file) as file:
-        cve_data = json.load(file)
-    # pprint.pprint(cve_data)
+def count_cves(cve_data):
+    print("Going to count CVEs per repo and per RIC")
+
+    # Initialize the dictionary to store CVE counts per RIC
     ric_cves = dict.fromkeys(rics)
+
     for ric in cve_data.keys():
         total_ric_cves = []
         for repository in cve_data[ric].keys():
@@ -296,20 +294,21 @@ def count_cves():
                 if sca_tool == "Scantist.json":
                     continue
                 else:
-                    print("RIC:" + str(ric) + " Repository:" + str(repository) + " SCA Tool:" + str(sca_tool) +\
-                          " total CVE Count: " + str(len(cve_data[ric][repository][sca_tool][0])))
-                    # Append only unique cves to count total unique vulnerabilities for a repository
-                    # But when counting per repository duplicates across repositories are not a factor
+                    print("RIC: {}, Repository: {}, SCA Tool: {}, total CVE Count: {}".format(
+                        ric, repository, sca_tool, len(cve_data[ric][repository][sca_tool][0])
+                    ))
+                    # Append only unique CVEs to count total unique vulnerabilities for a repository
                     for cve in cve_data[ric][repository][sca_tool][0]:
                         if cve not in total_repo_cves:
                             total_repo_cves.append(cve)
             print("RIC: {}, Repository: {}, Total Repo CVEs: {}".format(ric, repository, len(total_repo_cves)))
-            for i in total_repo_cves:
-                total_ric_cves.append(i)
+            total_ric_cves.extend(total_repo_cves)
         ric_cves[ric] = total_ric_cves
+    
     pprint.pprint(ric_cves)
     for ric in ric_cves.keys():
-        pprint.pprint(len(ric_cves[ric]))
+        print("RIC: {}, Total unique CVEs: {}".format(ric, len(ric_cves[ric])))
+
 def main():
     parser = argparse.ArgumentParser(description='Format SCA tool data')
     parser.add_argument('data_file', type=str, help='Path to the data file in JSON format')
@@ -328,6 +327,7 @@ def main():
     sca_cvecvss_dependencies_results = extract_cves(sca_results)
 
 
+    count_cves(sca_cvecvss_dependencies_results)
 
 if __name__ == "__main__":
     main()
