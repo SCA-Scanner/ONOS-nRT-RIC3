@@ -489,6 +489,44 @@ def package_distribution_analysis(cvss_data):
             print("RIC: {}\tRepository: {}\t\tUnique packages: {}".format(ric, repo, packages_per_ric_repo[ric][repo][0]["unique_packages"]))
     
     return packages_per_ric_repo, packages_per_ric
+
+
+
+def tabulate_cvss():
+    low_cve_json_file = os.path.join(path_to_results + 'per_ric_per_repo_low_cves.json')
+    medium_cve_json_file = os.path.join(path_to_results + 'per_ric_per_repo_medium_cves.json')
+    high_cve_json_file = os.path.join(path_to_results + 'per_ric_per_repo_high_cves.json')
+    critical_cve_json_file = os.path.join(path_to_results + 'per_ric_per_repo_critical_cves.json')
+    low_cve_data = {}
+    medium_cve_data = {}
+    high_cve_data = {}
+    critical_cve_data = {}
+    with open(low_cve_json_file) as file:
+        low_cve_data = json.load(file)
+    with open(medium_cve_json_file) as file:
+        medium_cve_data = json.load(file)
+    with open(high_cve_json_file) as file:
+        high_cve_data = json.load(file)
+    with open(critical_cve_json_file) as file:
+        critical_cve_data = json.load(file)
+    for ric in low_cve_data.keys():
+        low_cve_count = 0
+        medium_cve_count = 0
+        high_cve_count = 0
+        critical_cve_count = 0
+        for repository in low_cve_data[ric]:
+            low_cve_count += low_cve_data[ric][repository][0]
+        for repository in medium_cve_data[ric]:
+            medium_cve_count += medium_cve_data[ric][repository][0]
+        for repository in high_cve_data[ric]:
+            high_cve_count += high_cve_data[ric][repository][0]
+        for repository in critical_cve_data[ric]:
+            critical_cve_count += critical_cve_data[ric][repository][0]
+        print("RIC: " + str(ric) + " TOTAL Low CVEs: " + str(low_cve_count))
+        print("RIC: " + str(ric) + " TOTAL Medium CVEs: " + str(medium_cve_count))
+        print("RIC: " + str(ric) + " TOTAL High CVEs: " + str(high_cve_count))
+        print("RIC: " + str(ric) + " TOTAL Critical CVEs: " + str(critical_cve_count))
+
 def main():
     parser = argparse.ArgumentParser(description='Format SCA tool data')
     parser.add_argument('data_file', type=str, help='Path to the data file in JSON format')
