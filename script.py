@@ -439,6 +439,55 @@ def cvss_distribution(cvss_data):
     
     return low_cvss_per_ric_repo, medium_cvss_per_ric_repo, high_cvss_per_ric_repo, critical_cvss_per_ric_repo, cve_per_ric_repo
 
+
+
+def package_distribution_analysis():
+    print("")
+    cve_json_file = os.path.join(path_to_results + 'sca_cvecvss_dependencies_results.json')
+    cvss_data = {}
+    with open(cve_json_file) as file:
+        cvss_data = json.load(file)
+    # First cves per ric/repo/tool
+
+    packages_per_ric_repo = dict.fromkeys(rics)
+    packages_per_ric = dict.fromkeys(rics)
+    for ric in cvss_data.keys():
+        packages_per_ric_repo[ric] = dict.fromkeys(cvss_data[ric].keys())
+        ric_packages = []
+        for repository in cvss_data[ric].keys():
+            packages_per_ric_repo[ric][repository] = dict.fromkeys(cvss_data[ric][repository].keys())
+            packages = []
+            unique_packages = []
+            for sca_tool in cvss_data[ric][repository].keys():
+                if sca_tool == "Scantist.json":
+                    continue
+                else:
+                    for path in cvss_data[ric][repository][sca_tool][2]:
+                        packages.append(path)
+                        ric_packages.append(path)
+                        if path not in unique_packages:
+                            unique_packages.append(path)
+            packages_per_ric_repo[ric][repository] = [{"unique_packages": len(unique_packages)}, dict(Counter(packages))]
+        packages_per_ric[ric] = dict(Counter(ric_packages))
+    # pprint.pprint(packages_per_ric)
+    onos = packages_per_ric["ONOS"]
+    osc = packages_per_ric["OSC"]
+    sorted_onos = sorted(onos.items(), key=lambda x: x[1], reverse=True)
+    sorted_osc = sorted(osc.items(), key=lambda x: x[1], reverse=True)
+    print("Sorted ONOS")
+    pprint.pprint(sorted_onos)
+    print("Sorted OSC")
+    pprint.pprint(sorted_osc)
+    print("Now to print per_ric_per_repo_packages")
+    pprint.pprint(packages_per_ric_repo)
+    for ric in rics:
+        for repo in packages_per_ric_repo[ric]:
+            print("RIC: {}\tRepository:{}\t\t\t\t\tUnique packages:{}".format(ric, repo, packages_per_ric_repo[ric][repo][0]["unique_packages"]))
+    with open(path_to_results + 'per_ric_per_repo_packages.json', 'w') as file:
+        json.dump(packages_per_ric_repo, file)
+    with open(path_to_results + 'per_ric_packages.json', 'w') as file:
+        json.dump(packages_per_ric, file)
+
 def main():
     parser = argparse.ArgumentParser(description='Format SCA tool data')
     parser.add_argument('data_file', type=str, help='Path to the data file in JSON format')
@@ -461,6 +510,7 @@ def main():
 
     cve_per_ric_repo_tool, cve_per_ric_repo = per_repo_cve_count(sca_cvecvss_dependencies_results)
 
+    low_cvss_per_ric_repo, medium_cvss_per_ric_repo, high_cvss_per_ric_repo, critical_cvss_per_ric_repo, cve_per_ric_repo = cvss_distribution(sca_cvecvss_dependencies_results)
 
 
 if __name__ == "__main__":
