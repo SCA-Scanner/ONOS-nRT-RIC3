@@ -249,6 +249,36 @@ def get_cves_cvss_dependencies(sca_tool, sca_tool_data):
     return cves_cvss_dependencies
 
 
+def extract_cves():
+    # First read out the data
+    scan_results_json = os.path.join(path_to_results + scan_results_file)
+    sca_results = {}
+    sca_cvecvss_dependencies = {}
+    with open(scan_results_json) as file:
+        sca_results = json.load(file)
+    print("Finished reading the sca results file.")
+    sca_cvecvss_dependencies = dict.fromkeys(rics)
+    for ric in sca_results.keys():
+        # Create repos as keys
+        sca_cvecvss_dependencies[ric] = dict.fromkeys(sca_results[ric].keys())
+        for repository in sca_results[ric].keys():
+            sca_cvecvss_dependencies[ric][repository] = dict.fromkeys(sca_results[ric][repository].keys())
+            print(repository)
+            for sca_tool in sca_results[ric][repository].keys():
+                sca_cvecvss_dependencies[ric][repository][sca_tool] = get_cves_cvss_dependencies(sca_tool, sca_results[ric][repository][sca_tool])
+                print("Comparing length of cve and cvss lists.\n"
+                    "RIC: {}, Repository: {}, SCA_Tool: {}, CVE len: {}, CVSS len: {}".format(ric, repository, sca_tool,
+                                                                                              len(sca_cvecvss_dependencies[ric][repository][sca_tool][0]), len(sca_cvecvss_dependencies[ric][repository][sca_tool][1])))
+                if len(sca_cvecvss_dependencies[ric][repository][sca_tool][0]) != len(sca_cvecvss_dependencies[ric][repository][sca_tool][1]):
+                    print("More CVSS than CVE")
+    print("Printing sca_cvecvss_dependencies results...")
+    pprint.pprint(sca_cvecvss_dependencies)
+    with open(path_to_results + 'sca_cvecvss_dependencies_results.json', 'w') as file:
+        json.dump(sca_cvecvss_dependencies, file)
+    print("Finished writing: " + path_to_results + 'sca_cvecvss_dependencies_results.json')
+
+
+
 def main():
     parser = argparse.ArgumentParser(description='Format SCA tool data')
     parser.add_argument('data_file', type=str, help='Path to the data file in JSON format')
