@@ -88,7 +88,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: grype_results
-          path: t-kolev/ric-plt-xapp-frame/scan/
+          path: scan/
       
       - name: setup python
         uses: actions/setup-python@v4
@@ -101,7 +101,7 @@ jobs:
           pip install -r requirements.txt
   
       - name: Running the Python Script
-        run: python script.py t-kolev/ric-plt-xapp-frame/scan/results.json "Grype.txt" > results.json 
+        run: python script.py scan/results.json "Grype.txt" > results.json 
       
 
       - name: Save the json vulnerability report to an artifact
