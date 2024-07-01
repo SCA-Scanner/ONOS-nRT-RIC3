@@ -131,8 +131,19 @@ def formatTrivy(repository):
                 vulnArray.extend(vulnTarget)
     return vulnArray
 
+def get_vulnerabilities_by_directory(formatted_data):
+        vulnerabilities_by_directory = defaultdict(list)
+        
+        for vuln in formatted_data:
+                path = vuln.get("artifact").get("locations")[0].get("path")
+                directory = os.path.dirname(path)
+                vulnerabilities_by_directory[directory].append(vuln)
+
+        return vulnerabilities_by_directory
+
 def save_vulnerabilities_by_directory(vulnerabilities_by_directory, base_dir="./ONOS"):
     for directory, vulnerabilities in vulnerabilities_by_directory.items():
+        
         clean_directory = re.sub(r'[^a-zA-Z0-9_\-]', '', directory)
         dir_path = os.path.join(base_dir, clean_directory)
         os.makedirs(dir_path, exist_ok=True)
@@ -141,7 +152,9 @@ def save_vulnerabilities_by_directory(vulnerabilities_by_directory, base_dir="./
         filepath = os.path.join(dir_path, filename)
         
         with open(filepath, 'w') as json_file:
-            json.dump(vulnerabilities, json_file, indent=4)
+            json.dump(vulnerabilities, json_file, separators=(',', ':'))
+        
+        
 
 def dump_scan_results(rics, sca_tools):
     scan_results = dict.fromkeys(rics)
@@ -167,9 +180,8 @@ def dump_scan_results(rics, sca_tools):
             for sca_tool_file in sorted(os.listdir(path_to_repository)):
                 sca_tool_file_path = os.path.join(path_to_repository, sca_tool_file)
                 with open(sca_tool_file_path) as file:
-                    unformatted_data = file.read()
-                formatted_data = format_sca_tool_data(unformatted_data, sca_tool_file)
-                scan_results[ric][repository][sca_tool_file] = formatted_data
+                    vuln = file.read()
+                scan_results[ric][repository][sca_tool_file] = vuln
     with open('sca_results.json', 'w') as file:
         json.dump(scan_results, file)
     print("Finished writing: " + 'sca_results.json')
@@ -184,16 +196,11 @@ def main():
     with open(args.data_file, 'r') as file:
         data = file.read()
 
-    vulnerabilities_by_directory = defaultdict(list)
-
     formatted_data = format_sca_tool_data(data, args.tool)
-    for vuln in formatted_data:
-        path = vuln.get("artifact").get("locations")[0].get("path")
-        directory = os.path.dirname(path)
-        vulnerabilities_by_directory[directory].append(vuln)
-
+    vulnerabilities_by_directory = get_vulnerabilities_by_directory(formatted_data)
     save_vulnerabilities_by_directory(vulnerabilities_by_directory)
     dump_scan_results(['ONOS', 'OSC'], ['Grype.txt'])
+
 
 if __name__ == "__main__":
     main()
