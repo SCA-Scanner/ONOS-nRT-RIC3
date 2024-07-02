@@ -23,6 +23,8 @@ test_package = re.compile(r'test/')
 benchmark_package = re.compile(r'benchmark')
 examples_package = re.compile(r'examples/')
 testapplication_package = re.compile(r'testapplication/')
+cert_package = re.compile(r'certs/')
+
 
 
 # First we normalize the results from each tool
@@ -131,7 +133,21 @@ def formatTrivy(repository):
                 vulnArray.extend(vulnTarget)
     return vulnArray
 
-def get_vulnerabilities_by_directory(formatted_data, tool):
+def get_vulnerabilities_by_directory(data, tool):
+        # For grype we can work with the formatted data directly
+        if tool == "Grype.txt":
+            formatted_data = format_sca_tool_data(data, "Grype.txt")
+        
+        # For trivy we need to use the unformatted data
+        # For trivy we need to load the data into a json object first.
+        elif tool == "Trivy.txt":
+            repo = json.loads(data)
+            results = repo.get("Results")
+
+        # For snyk we dont know yet
+        elif tool == "Snyk.txt":
+            skip = True
+
         vulnerabilities_by_directory = defaultdict(list)
         
         if tool == "Grype.txt":
@@ -140,19 +156,31 @@ def get_vulnerabilities_by_directory(formatted_data, tool):
                 directory = os.path.dirname(path)
                 vulnerabilities_by_directory[directory].append(vuln)
             return vulnerabilities_by_directory
+        
         elif tool == "Trivy.txt":
-            for vuln in formatted_data:
+            for vuln in results:
                 path = vuln.get("Target")
-                directory = os.path.dirname(path)
-                vulnerabilities_by_directory[directory].append(vuln)
-
-
+                if test_package.search(path) is not None:
+                    continue
+                elif benchmark_package.search(path) is not None:
+                    continue
+                elif examples_package.search(path) is not None:
+                    continue
+                elif cert_package.search(path) is not None:
+                    continue
+                else:
+                    vulnTarget = vuln.get("Vulnerabilities", [])
+                    if not vulnTarget:
+                        continue
+                    for vuln in vulnTarget:
+                        vuln["Path"] = path
+                        directory = os.path.dirname(path)
+                        vulnerabilities_by_directory[directory].append(vuln)
             return vulnerabilities_by_directory
         elif tool == "Snyk.txt":
-
-
-        
+       
             return vulnerabilities_by_directory
+        
 
 def save_vulnerabilities_by_directory(vulnerabilities_by_directory, tool, base_dir="./ONOS"):
     for directory, vulnerabilities in vulnerabilities_by_directory.items():
@@ -548,7 +576,7 @@ def main():
 
     formatted_data = format_sca_tool_data(data, args.tool)
 
-    vulnerabilities_by_directory = get_vulnerabilities_by_directory(formatted_data, args.tool)
+    vulnerabilities_by_directory = get_vulnerabilities_by_directory(data, args.tool)
 
     save_vulnerabilities_by_directory(vulnerabilities_by_directory, args.tool)
 
