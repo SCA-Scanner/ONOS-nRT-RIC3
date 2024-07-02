@@ -131,24 +131,37 @@ def formatTrivy(repository):
                 vulnArray.extend(vulnTarget)
     return vulnArray
 
-def get_vulnerabilities_by_directory(formatted_data):
+def get_vulnerabilities_by_directory(formatted_data, tool):
         vulnerabilities_by_directory = defaultdict(list)
         
-        for vuln in formatted_data:
+        if tool == "Grype.txt":
+            for vuln in formatted_data:
                 path = vuln.get("artifact").get("locations")[0].get("path")
                 directory = os.path.dirname(path)
                 vulnerabilities_by_directory[directory].append(vuln)
+            return vulnerabilities_by_directory
+        elif tool == "Trivy.txt":
+            for vuln in formatted_data:
+                path = vuln.get("Target")
+                directory = os.path.dirname(path)
+                vulnerabilities_by_directory[directory].append(vuln)
 
-        return vulnerabilities_by_directory
 
-def save_vulnerabilities_by_directory(vulnerabilities_by_directory, base_dir="./ONOS"):
+            return vulnerabilities_by_directory
+        elif tool == "Snyk.txt":
+
+
+        
+            return vulnerabilities_by_directory
+
+def save_vulnerabilities_by_directory(vulnerabilities_by_directory, tool, base_dir="./ONOS"):
     for directory, vulnerabilities in vulnerabilities_by_directory.items():
         
         clean_directory = re.sub(r'[^a-zA-Z0-9_\-]', '', directory)
         dir_path = os.path.join(base_dir, clean_directory)
         os.makedirs(dir_path, exist_ok=True)
         
-        filename = "Grype.txt"
+        filename = f"{tool}"
         filepath = os.path.join(dir_path, filename)
         
         with open(filepath, 'w') as json_file:
@@ -492,23 +505,7 @@ def package_distribution_analysis(cvss_data):
 
 
 
-def tabulate_cvss():
-    low_cve_json_file = os.path.join(path_to_results + 'per_ric_per_repo_low_cves.json')
-    medium_cve_json_file = os.path.join(path_to_results + 'per_ric_per_repo_medium_cves.json')
-    high_cve_json_file = os.path.join(path_to_results + 'per_ric_per_repo_high_cves.json')
-    critical_cve_json_file = os.path.join(path_to_results + 'per_ric_per_repo_critical_cves.json')
-    low_cve_data = {}
-    medium_cve_data = {}
-    high_cve_data = {}
-    critical_cve_data = {}
-    with open(low_cve_json_file) as file:
-        low_cve_data = json.load(file)
-    with open(medium_cve_json_file) as file:
-        medium_cve_data = json.load(file)
-    with open(high_cve_json_file) as file:
-        high_cve_data = json.load(file)
-    with open(critical_cve_json_file) as file:
-        critical_cve_data = json.load(file)
+def tabulate_cvss(low_cve_data, medium_cve_data, high_cve_data, critical_cve_data):
     for ric in low_cve_data.keys():
         low_cve_count = 0
         medium_cve_count = 0
@@ -527,6 +524,19 @@ def tabulate_cvss():
         print("RIC: " + str(ric) + " TOTAL High CVEs: " + str(high_cve_count))
         print("RIC: " + str(ric) + " TOTAL Critical CVEs: " + str(critical_cve_count))
 
+# Example usage with provided CVE data
+with open('per_ric_per_repo_low_cves.json', 'r') as file:
+    low_cve_data = json.load(file)
+with open('per_ric_per_repo_medium_cves.json', 'r') as file:
+    medium_cve_data = json.load(file)
+with open('per_ric_per_repo_high_cves.json', 'r') as file:
+    high_cve_data = json.load(file)
+with open('per_ric_per_repo_critical_cves.json', 'r') as file:
+    critical_cve_data = json.load(file)
+
+tabulate_cvss(low_cve_data, medium_cve_data, high_cve_data, critical_cve_data)
+
+
 def main():
     parser = argparse.ArgumentParser(description='Format SCA tool data')
     parser.add_argument('data_file', type=str, help='Path to the data file in JSON format')
@@ -538,8 +548,9 @@ def main():
 
     formatted_data = format_sca_tool_data(data, args.tool)
 
-    vulnerabilities_by_directory = get_vulnerabilities_by_directory(formatted_data)
-    save_vulnerabilities_by_directory(vulnerabilities_by_directory)
+    vulnerabilities_by_directory = get_vulnerabilities_by_directory(formatted_data, args.tool)
+
+    save_vulnerabilities_by_directory(vulnerabilities_by_directory, args.tool)
 
     sca_results = dump_scan_results(['ONOS', 'OSC'], ['Grype.txt'])
     sca_cvecvss_dependencies_results = extract_cves(sca_results)
@@ -553,6 +564,7 @@ def main():
 
     packages_per_ric_repo, packages_per_ric = package_distribution_analysis(sca_cvecvss_dependencies_results)
 
+    tabulate_cvss(low_cvss_per_ric_repo, medium_cvss_per_ric_repo, high_cvss_per_ric_repo, critical_cvss_per_ric_repo)
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,1 @@
+{"ONOS": {"onos-a1t": [3, ["GHSA-crxj-hrmp-4rwf", "CVE-2021-43816", "CVE-2022-40083"]], "onos-cli": [0, []], "onos-config": [0, []], "onos-e2t": [0, []], "onos-kpimon": [1, ["CVE-2021-43816"]], "onos-lib-go": [0, []], "onos-operator": [2, ["GHSA-r48q-9g5r-8q2h", "CVE-2022-1996"]], "onos-topo": [0, []], "onos-uenib": [1, ["CVE-2021-43816"]]}, "OSC": {}}
