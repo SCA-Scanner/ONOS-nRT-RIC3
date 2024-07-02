@@ -26,7 +26,7 @@ jobs:
         - name: Download result for job Trivy-Scan
           uses: actions/download-artifact@v4
           with:
-            name: trivy_results
+            name: trivy_results.json
             path: scan/
         
         - name: setup python
