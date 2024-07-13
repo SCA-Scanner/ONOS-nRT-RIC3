@@ -71,7 +71,7 @@ jobs:
             pip install -r requirements.txt
     
         - name: Running the Python Script
-          run: python script.py scan/results.json "Trivy.txt" "ONOS" > results.json 
+          run: python script.py scan/trivy_results.json "Trivy.txt" "ONOS" > results.json 
         
 
         - name: Save the json vulnerability report to an artifact
