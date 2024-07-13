@@ -228,16 +228,16 @@ def get_vulnerabilities_by_directory(data, tool):
         
         
 
-def save_vulnerabilities_by_directory(vulnerabilities_by_directory, tool, base_dir="./ONOS"):
+def save_vulnerabilities_by_directory(vulnerabilities_by_directory, tool, base_dir):
     for directory, vulnerabilities in vulnerabilities_by_directory.items():
-        
+
         clean_directory = re.sub(r'[^a-zA-Z0-9_\-]', '', directory)
         dir_path = os.path.join(base_dir, clean_directory)
         os.makedirs(dir_path, exist_ok=True)
-        
+
         filename = f"{tool}"
         filepath = os.path.join(dir_path, filename)
-        
+
         with open(filepath, 'w') as json_file:
             json.dump(vulnerabilities, json_file, separators=(',', ':'))
         
@@ -270,8 +270,8 @@ def dump_scan_results(rics, sca_tools):
                 scan_results[ric][repository][sca_tool_file] = vuln
     with open('sca_results.json', 'w') as file:
         json.dump(scan_results, file)
-    print("Finished writing: " + 'sca_results.json')
-    pprint.pprint(scan_results)
+    #print("Finished writing: " + 'sca_results.json')
+    #pprint.pprint(scan_results)
     return scan_results
 
 # Define the get_cves_cvss_dependencies function
@@ -352,12 +352,12 @@ def extract_cves(sca_results):
                     try:
                         sca_tool_data = json.loads(sca_tool_data_str)
                         sca_cvecvss_dependencies[ric][repository][sca_tool] = get_cves_cvss_dependencies(sca_tool, sca_tool_data)
-                        print("Comparing length of CVE and CVSS lists.\n"
-                              "RIC: {}, Repository: {}, SCA_Tool: {}, CVE len: {}, CVSS len: {}".format(
-                                  ric, repository, sca_tool,
-                                  len(sca_cvecvss_dependencies[ric][repository][sca_tool][0]), 
-                                  len(sca_cvecvss_dependencies[ric][repository][sca_tool][1])
-                              ))
+                        # print("Comparing length of CVE and CVSS lists.\n"
+                        #       "RIC: {}, Repository: {}, SCA_Tool: {}, CVE len: {}, CVSS len: {}".format(
+                        #           ric, repository, sca_tool,
+                        #           len(sca_cvecvss_dependencies[ric][repository][sca_tool][0]), 
+                        #           len(sca_cvecvss_dependencies[ric][repository][sca_tool][1])
+                        #       ))
                         if len(sca_cvecvss_dependencies[ric][repository][sca_tool][0]) != len(sca_cvecvss_dependencies[ric][repository][sca_tool][1]):
                             print("More CVSS than CVE")
                     except json.JSONDecodeError:
@@ -385,7 +385,7 @@ def count_cves(cve_data):
             total_repo_cves = []
             for sca_tool in cve_data[ric][repository].keys():
                 if cve_data[ric][repository][sca_tool] is None or cve_data[ric][repository][sca_tool][0] is None:
-                    print(f"NoneType found for RIC: {ric}, Repository: {repository}, SCA_Tool: {sca_tool}")
+                    #print(f"NoneType found for RIC: {ric}, Repository: {repository}, SCA_Tool: {sca_tool}")
                     total_cve_count = 0
                 else:
                     try:
@@ -395,9 +395,7 @@ def count_cves(cve_data):
                         print(f"Exception: {e}")
                         total_cve_count = 0
                     
-                print("RIC: {}, Repository: {}, SCA Tool: {}, total CVE Count: {}".format(
-                    ric, repository, sca_tool, total_cve_count
-                ))
+                #print("RIC: {}, Repository: {}, SCA Tool: {}, total CVE Count: {}".format(ric, repository, sca_tool, total_cve_count))
                     
                 # Append only unique CVEs to count total unique vulnerabilities for a repository
                 if cve_data[ric][repository][sca_tool] is not None and cve_data[ric][repository][sca_tool][0] is not None:
@@ -435,7 +433,7 @@ def per_repo_cve_count(cve_data):
                             print(f"NoneType found for RIC: {ric}, Repository: {repository}, SCA_Tool: {sca_tool}")
                             print(f"Exception: {e}")
                             cve_per_ric_repo_tool[ric][repository][sca_tool] = 0
-    pprint.pprint(cve_per_ric_repo_tool)
+    #pprint.pprint(cve_per_ric_repo_tool)
 
     # Now combine the CVEs from all the tools and save two lists with_dups and without_dups
     cve_per_ric_repo = dict.fromkeys(rics)
@@ -454,19 +452,19 @@ def per_repo_cve_count(cve_data):
                         print(f"NoneType found for RIC: {ric}, Repository: {repository}, SCA_Tool: {sca_tool}")
                         print(f"Exception: {e}")
             cve_per_ric_repo[ric][repository] = [cve_list_with_dups, cve_list_without_dups]
-            print("Repository: {}".format(repository))
-            print("Length with duplicates: {}".format(len(cve_list_with_dups)))
-            print("Length without duplicates: {}".format(len(cve_list_without_dups)))
+            #print("Repository: {}".format(repository))
+            #print("Length with duplicates: {}".format(len(cve_list_with_dups)))
+            #print("Length without duplicates: {}".format(len(cve_list_without_dups)))
 
     return cve_per_ric_repo_tool, cve_per_ric_repo
 
 
 def cvss_distribution(cvss_data):
-    print("1. Print per RIC per repo per tool CVSS >= 8\n"
-          "2. Print per RIC per repo CVSS >= 8")
+    #print("1. Print per RIC per repo per tool CVSS >= 8\n"
+          #"2. Print per RIC per repo CVSS >= 8")
     
     # Print total CVE and CVSS counts per RIC
-    print("Going to compare CVE list and CVSS list and then count the number of CVSS")
+    #print("Going to compare CVE list and CVSS list and then count the number of CVSS")
     for ric in cvss_data.keys():
         total_cve_count = 0
         total_cvss_count = 0
@@ -475,7 +473,7 @@ def cvss_distribution(cvss_data):
                 if cvss_data[ric][repository][sca_tool] is not None:
                     total_cve_count += len(cvss_data[ric][repository][sca_tool][0])
                     total_cvss_count += len(cvss_data[ric][repository][sca_tool][1])
-        print("RIC:{}, total_cve_count:{}, total_cvss_count:{}".format(ric, total_cve_count, total_cvss_count))
+        #print("RIC:{}, total_cve_count:{}, total_cvss_count:{}".format(ric, total_cve_count, total_cvss_count))
 
     # Initialize dictionaries for CVSS distribution
     low_cvss_per_ric_repo = dict.fromkeys(cvss_data.keys())
@@ -512,25 +510,25 @@ def cvss_distribution(cvss_data):
                         if cvss is None:
                             none_counter += 1
                         elif 0.1 <= cvss <= 3.9:
-                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))
+                            #print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))
                             if cve not in low_cves and cve not in medium_cves and cve not in high_cves and cve not in critical_cves:
                                 low_cves.append(cve)
                             if cve not in cves:
                                 cves.append(cve)
                         elif 4.0 <= cvss <= 6.9:
-                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))
+                            #print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))
                             if cve not in low_cves and cve not in medium_cves and cve not in high_cves and cve not in critical_cves:
                                 medium_cves.append(cve)
                             if cve not in cves:
                                 cves.append(cve)
                         elif 7.0 <= cvss <= 8.9:
-                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))
+                            #print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))
                             if cve not in low_cves and cve not in medium_cves and cve not in high_cves and cve not in critical_cves:
                                 high_cves.append(cve)
                             if cve not in cves:
                                 cves.append(cve)
                         elif 9.0 <= cvss <= 10.0:
-                            print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))
+                            #print("Repository: {}, Tool: {}, CVE: {}, CVSS: {}".format(repository, sca_tool, cve, cvss))
                             if cve not in low_cves and cve not in medium_cves and cve not in high_cves and cve not in critical_cves:
                                 critical_cves.append(cve)
                             if cve not in cves:
@@ -542,7 +540,7 @@ def cvss_distribution(cvss_data):
             critical_cvss_per_ric_repo[ric][repository] = [len(critical_cves), critical_cves]
             cve_per_ric_repo[ric][repository] = [len(cves), cves]
             total = len(low_cves) + len(medium_cves) + len(high_cves) + len(critical_cves)
-            print("RIC: {}, Repository: {}, Total count: {}".format(ric, repository, total))
+            #print("RIC: {}, Repository: {}, Total count: {}".format(ric, repository, total))
     
     print("Nonecounter: " + str(none_counter))
     
@@ -577,23 +575,22 @@ def package_distribution_analysis(cvss_data):
         packages_per_ric[ric] = dict(Counter(ric_packages))
     
     # Sort and print package distributions
-    onos = packages_per_ric["ONOS"]
-    osc = packages_per_ric["OSC"]
-    sorted_onos = sorted(onos.items(), key=lambda x: x[1], reverse=True)
-    sorted_osc = sorted(osc.items(), key=lambda x: x[1], reverse=True)
+    #onos = packages_per_ric["ONOS"]
+    #osc = packages_per_ric["OSC"]
+    #sorted_onos = sorted(onos.items(), key=lambda x: x[1], reverse=True)
+    #sorted_osc = sorted(osc.items(), key=lambda x: x[1], reverse=True)
     
-    print("Sorted ONOS")
-    pprint.pprint(sorted_onos)
-    print("Sorted OSC")
-    pprint.pprint(sorted_osc)
+    #print("Sorted ONOS")
+    #pprint.pprint(sorted_onos)
+    #print("Sorted OSC")
+    #pprint.pprint(sorted_osc)
     
-    print("Now to print per RIC per repo packages")
-    pprint.pprint(packages_per_ric_repo)
+    #print("Now to print per RIC per repo packages")
+    #pprint.pprint(packages_per_ric_repo)
     
-    for ric in packages_per_ric_repo:
-        for repo in packages_per_ric_repo[ric]:
-            print("RIC: {}\tRepository: {}\t\tUnique packages: {}".format(ric, repo, packages_per_ric_repo[ric][repo][0]["unique_packages"]))
-    
+    #for ric in packages_per_ric_repo:
+    #    for repo in packages_per_ric_repo[ric]:
+    #        print("RIC: {}\tRepository: {}\t\tUnique packages: {}".format(ric, repo, packages_per_ric_repo[ric][repo][0]["unique_packages"]))
     return packages_per_ric_repo, packages_per_ric
 
 
@@ -624,8 +621,11 @@ def main():
     parser = argparse.ArgumentParser(description='Format SCA tool data')
     parser.add_argument('data_file', type=str, help='Path to the data file in JSON format')
     parser.add_argument('tool', type=str, choices=['Grype.txt', 'Snyk.txt', 'Trivy.txt'], help='SCA tool used')
+    parser.add_argument('ric', type=str, help='RIC name')
+
     args = parser.parse_args()
 
+    
     with open(args.data_file, 'r') as file:
         data = file.read()
 
@@ -633,7 +633,9 @@ def main():
 
     vulnerabilities_by_directory = get_vulnerabilities_by_directory(data, args.tool)
 
-    save_vulnerabilities_by_directory(vulnerabilities_by_directory, args.tool)
+
+    base_dir = f"./{args.ric}"
+    save_vulnerabilities_by_directory(vulnerabilities_by_directory, args.tool, base_dir)
 
     sca_results = dump_scan_results(['ONOS', 'OSC'], ['Grype.txt'])
     sca_cvecvss_dependencies_results = extract_cves(sca_results)
