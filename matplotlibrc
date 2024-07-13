@@ -1,0 +1,45 @@
+# Customizing matplotlib default settings for academic paper quality
+# Save this as matplotlibrc
+
+# Figure properties
+figure.figsize : 14, 8  # Default figure size
+figure.dpi : 300  # High resolution for publication quality
+figure.autolayout : True  # Adjust subplot parameters to give specified padding
+
+# Font properties
+font.family : serif
+font.size : 14
+text.usetex : False  # Use TeX for rendering text
+
+# Axes properties
+axes.titlesize : 16
+axes.labelsize : 14
+axes.grid : True
+axes.facecolor : white
+axes.edgecolor : black
+axes.spines.top : True
+axes.spines.right : True
+axes.spines.left : True
+axes.spines.bottom : True
+
+# Ticks properties
+xtick.labelsize : 12
+ytick.labelsize : 12
+
+# Grid properties
+grid.color : gray
+grid.linestyle : --
+grid.linewidth : 0.5
+
+# Legend properties
+legend.fontsize : 12
+legend.frameon : True
+legend.loc : best
+
+# Lines properties
+lines.linewidth : 2
+lines.markersize : 6
+
+# Savefig properties
+savefig.dpi : 300  # Higher resolution for saved figures
+savefig.bbox : tight  # Prevents cutting off parts of the figure
