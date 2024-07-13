@@ -53,6 +53,7 @@ jobs:
     steps:
       - name: Check out the code 
         uses: actions/checkout@v3
+
       - name: Download result for job Grype-Scan
         uses: actions/download-artifact@v4
         with:
@@ -70,11 +71,26 @@ jobs:
           pip install -r requirements.txt
   
       - name: Running the Python Script
-        run: python script.py scan/results.json "Grype.txt" "ONOS" > results.json 
+        run: python abgabe.py scan/results.json "Grype.txt" "ONOS" 
       
-
-      - name: Save the json vulnerability report to an artifact
-        uses: actions/upload-artifact@master
+      # Save the JSON vulnerability report to an artifact
+      - name: Save the JSON vulnerability report to an artifact
+        uses: actions/upload-artifact@v3
         with:
           name: results_data_analysis
           path: results.json
+
+      # Save the plots to artifacts
+      - name: Save plots to artifacts
+        uses: actions/upload-artifact@v3
+        with:
+            name: plots
+            path: |
+              total_vulnerabilities_per_ric.png
+              vulnerabilities_per_repo_ONOS.png
+              vulnerabilities_per_repo_OSC.png
+              severity_distribution_ONOS.png
+              severity_distribution_OSC.png
+              vulnerable_packages_per_ric.png
+              vulnerable_packages_per_repo_ONOS.png
+              vulnerable_packages_per_repo_OSC.png
