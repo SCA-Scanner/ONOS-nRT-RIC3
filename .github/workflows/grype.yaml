@@ -101,7 +101,7 @@ jobs:
           pip install -r requirements.txt
   
       - name: Running the Python Script
-        run: python script.py scan/results.json "Grype.txt" > results.json 
+        run: python script.py scan/results.json "Grype.txt" "ONOS" > results.json 
       
 
       - name: Save the json vulnerability report to an artifact
