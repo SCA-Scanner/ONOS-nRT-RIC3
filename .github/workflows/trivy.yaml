@@ -73,6 +73,15 @@ jobs:
     
         - name: Running the Python Script
           run: python abgabe.py scan/trivy-results.json "Trivy.txt" "ONOS"
+        
+
+      # Save the JSON vulnerability report to an artifact
+        - name: Save the JSON vulnerability report to an artifact
+          uses: actions/upload-artifact@v3
+          with:
+            name: results_data_analysis
+            path: sca_results.json
+
 
         - name: Save plots to artifacts
           uses: actions/upload-artifact@v3
