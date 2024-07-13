@@ -72,11 +72,18 @@ jobs:
             pip install -r requirements.txt
     
         - name: Running the Python Script
-          run: python script.py scan/trivy-results.json "Trivy.txt" "ONOS" > results.json 
-        
+          run: python abgabe.py scan/trivy-results.json "Trivy.txt" "ONOS"
 
-        - name: Save the json vulnerability report to an artifact
+        - name: Save plots to artifacts
           uses: actions/upload-artifact@v3
           with:
-            name: results_data_analysis
-            path: results.json
+              name: plots
+              path: |
+                total_vulnerabilities_per_ric.png
+                vulnerabilities_per_repo_ONOS.png
+                vulnerabilities_per_repo_OSC.png
+                severity_distribution_ONOS.png
+                severity_distribution_OSC.png
+                vulnerable_packages_per_ric.png
+                vulnerable_packages_per_repo_ONOS.png
+                vulnerable_packages_per_repo_OSC.png
