@@ -22,7 +22,7 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - name: Check out the code 
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
         - name: Download result for job Trivy-Scan
           uses: actions/download-artifact@v4
           with:
