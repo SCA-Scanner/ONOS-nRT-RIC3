@@ -58,7 +58,7 @@ jobs:
         - name: Download result for job Trivy-Scan
           uses: actions/download-artifact@v3
           with:
-            name: trivy_results
+            name: trivy-results
             path: scan/
         
         - name: setup python
@@ -72,13 +72,11 @@ jobs:
             pip install -r requirements.txt
     
         - name: Running the Python Script
-          run: python script.py scan/trivy_results.json "Trivy.txt" "ONOS" > results.json 
+          run: python script.py scan/trivy-results.json "Trivy.txt" "ONOS" > results.json 
         
 
         - name: Save the json vulnerability report to an artifact
-          uses: actions/upload-artifact@master
+          uses: actions/upload-artifact@v3
           with:
             name: results_data_analysis
             path: results.json
-  
-  
