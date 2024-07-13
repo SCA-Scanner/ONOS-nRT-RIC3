@@ -270,8 +270,8 @@ def dump_scan_results(rics, sca_tools):
                 scan_results[ric][repository][sca_tool_file] = vuln
     with open('sca_results.json', 'w') as file:
         json.dump(scan_results, file)
-    #print("Finished writing: " + 'sca_results.json')
-    #pprint.pprint(scan_results)
+    print("Finished writing: " + 'sca_results.json')
+    pprint.pprint(scan_results)
     return scan_results
 
 # Define the get_cves_cvss_dependencies function
@@ -385,7 +385,7 @@ def count_cves(cve_data):
             total_repo_cves = []
             for sca_tool in cve_data[ric][repository].keys():
                 if cve_data[ric][repository][sca_tool] is None or cve_data[ric][repository][sca_tool][0] is None:
-                    #print(f"NoneType found for RIC: {ric}, Repository: {repository}, SCA_Tool: {sca_tool}")
+                    print(f"NoneType found for RIC: {ric}, Repository: {repository}, SCA_Tool: {sca_tool}")
                     total_cve_count = 0
                 else:
                     try:
@@ -637,7 +637,7 @@ def main():
     base_dir = f"./{args.ric}"
     save_vulnerabilities_by_directory(vulnerabilities_by_directory, args.tool, base_dir)
 
-    sca_results = dump_scan_results(['ONOS', 'OSC'], ['Grype.txt'])
+    sca_results = dump_scan_results(['ONOS'], ['Grype.txt'])
     sca_cvecvss_dependencies_results = extract_cves(sca_results)
 
 
