@@ -4,15 +4,16 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         
 
         {
             "name": "Python Debugger: Current File",
             "type": "debugpy",
             "request": "launch",
-            "program": "script.py",
+            "program": "tests.ipynb",
             "console": "integratedTerminal",
-            "args": ["results-26.json", "Grype.txt"]
+            "args": ["trivy-results-15.json", "Trivy.txt", "ONOS"]
         }
     ]
 }

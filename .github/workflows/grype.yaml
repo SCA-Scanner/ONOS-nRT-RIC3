@@ -82,7 +82,7 @@ jobs:
 
       # Save the plots to artifacts
       - name: Save plots to artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
             name: plots
             path: |
