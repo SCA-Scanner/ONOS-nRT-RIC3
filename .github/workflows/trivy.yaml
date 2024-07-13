@@ -39,7 +39,7 @@ jobs:
         - name: Save the json vulnerability report to an artifact
           uses: actions/upload-artifact@master
           with:
-            name: trivy-results.json
+            name: trivy-results
             path: ./trivy-results.json
             
         - name: Upload Trivy scan results to GitHub Security tab
@@ -54,11 +54,11 @@ jobs:
       steps:
         - name: Check out the code 
           uses: actions/checkout@v3
-          
+
         - name: Download result for job Trivy-Scan
-          uses: actions/download-artifact@master
+          uses: actions/download-artifact@v4
           with:
-            name: trivy_results.json
+            name: trivy_results
             path: scan/
         
         - name: setup python
