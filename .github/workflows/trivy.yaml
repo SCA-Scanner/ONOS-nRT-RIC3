@@ -21,7 +21,6 @@ jobs:
           
         - name: Running a scan with a sarif file as an output
           uses: aquasecurity/trivy-action@master
-          id: scan1
           with:
             scan-type: 'fs'
             format: 'template'
@@ -31,7 +30,6 @@ jobs:
             
         - name: Running a scan with a json file as an output
           uses: aquasecurity/trivy-action@master
-          id: scan2
           with:
             scan-type: 'fs'
             format: 'json'
@@ -39,10 +37,10 @@ jobs:
             severity: 'LOW,MEDIUM,CRITICAL,HIGH'
             
         - name: Save the json vulnerability report to an artifact
-          uses: actions/upload-artifact@v4
+          uses: actions/upload-artifact@master
           with:
             name: trivy-results.json
-            path: ${{ steps.scan1.outputs.json }}  
+            path: ./trivy-results.json
             
         - name: Upload Trivy scan results to GitHub Security tab
           uses: github/codeql-action/upload-sarif@v3
